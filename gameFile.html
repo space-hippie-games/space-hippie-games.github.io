@@ -1,0 +1,520 @@
+<html>
+<head>
+  <title>Hippie Space Drift| </title>
+  <meta name="viewport"  />
+  <style>
+    canvas {
+      border: 10px solid purple;
+      width: 100%;
+
+    }
+  </style>
+</head>
+<body>
+  <h1>Hippie Space Drift</h1>
+  <canvas id="mycanvas" tabindex="1" width="640" height="360" ></canvas>
+<script>
+window.addEventListener("load",function() {
+
+  var asteroidsArray = [
+    { pos: [10,4], vel: [-7,0], w: 91, h: 30, notHit: true,  approachSide: "right"},
+    { pos: [200,4], vel: [-7,0], w: 91, h: 30, notHit: true, approachSide: "right"},
+    { pos: [450,4], vel: [-7,0], w: 91, h: 30, notHit: true, approachSide: "right"}
+  ];
+
+  var asteroidsArray2 = [
+    { pos: [10,4], vel: [9,0], w: 91, h: 30, notHit: true, approachSide: "left"},
+    { pos: [200,4], vel: [9,0], w: 91, h: 30, notHit: true, approachSide: "left"},
+    { pos: [450,4], vel: [9,0], w: 91, h: 30, notHit: true, approachSide: "left"}
+  ];
+
+  var asteroidsArray3 = [
+    { pos: [10,4], vel: [-12,0], w: 91, h: 30, notHit: true, approachSide: "right"},
+    { pos: [200,4], vel: [-12,0], w: 91, h: 30, notHit: true, approachSide: "right"},
+    { pos: [450,4], vel: [-12,0], w: 91, h: 30, notHit: true, approachSide: "right"}
+  ];
+
+  function aRatMan() {
+    this.pos = [260, 580];
+    this.slope = [-2, 0];
+    this.w = 32;
+    this.h = 32;
+    this.notHit = true;
+    this.approachSide = "right";
+  }
+
+  aRatMan.prototype.move = function () {
+    this.pos = [this.pos[0] + this.slope[0], this.pos[1] + this.slope[1]]
+    if (this.pos[0] > GAME_WIDTH + 100 ) {
+      this.pos[0] = -100
+    } else if (this.pos[0] < -101) {
+      this.pos[0] =  GAME_WIDTH + 99
+    }
+
+  };
+
+  function groundShip () {
+    this.pos = [850 ,210];
+    this.slope = [0,0];
+    this.w = 100;
+    this.h = 110;
+    this.notHit = true;
+    this.hitsLeft = 1;
+    this.notStarted = true;
+  }
+
+  var testGroundShip = new groundShip()
+
+  //var testRatMan =  new aRatMan()
+  var testRatMan = new aRatMan()
+
+  testRatMan.pos = [580, 267]
+
+  //send to title screen if game not started
+  var gameNotStarted = true
+
+
+  var player = {
+     lives: 4,
+     pos: [260,265],
+     origin: [300, 400],
+     slope: [0,0],
+     speed: 3,
+     bulletsLeft: 10000,
+     hits: 0,
+     w: 32,
+     h: 32
+  }
+
+  var bulletsArray = [];
+  function Bullet(slope) {
+    this.pos = player.pos;
+    this.slope = slope;
+    this.w = 45;
+    this.h = 45;
+    this.direction = "up";
+  }
+
+  var lasersArray = []
+  function Laser(pos, slope) {
+    this.pos = pos;
+    this.slope = slope;
+    this.w = 32;
+    this.h = 32;
+    this.notHit = true;
+  }
+
+  function sound(src) {
+    this.sound = document.createElement("audio");
+    this.sound.src = src;
+    this.sound.setAttribute("preload", "auto");
+    this.sound.setAttribute("controls", "none");
+    this.sound.style.display = "none";
+    document.body.appendChild(this.sound);
+    this.play = function(){
+        this.sound.play();
+    }
+    this.stop = function(){
+        this.sound.pause();
+    }
+  }
+
+  var checkCollision = function(rect1, rect2) {
+    // debugger
+
+      // console.log(bulletsArray.length);
+      if (rect1.pos[0] < rect2.pos[0] + rect2.w &&
+         rect1.pos[0] + rect1.w > rect2.pos[0] &&
+         rect1.pos[1] < rect2.pos[1] + rect2.h &&
+         rect1.h + rect1.pos[1] > rect2.pos[1]) {
+           return true
+      }
+           return false
+
+
+  }
+  // sound files
+  var gameMusic;
+  gameMusic = new sound("sounds/sd.mp3");
+
+  var bulletSound;
+  bulletSound = new sound("sounds/bulletNoise.m4a");
+
+  var gameOverMusic;
+  gameOverMusic = new sound("sounds/gameOverSound.mp3");
+
+  var playerHitSound;
+  playerHitSound = new sound("sounds/ouch.m4a");
+
+  var laserSound;
+  laserSound = new sound("sounds/nip-sound.m4a");
+
+  var GAME_WIDTH = 640;
+  var GAME_HEIGHT = 360;
+
+  var sprites = {};
+  var load = function() {
+    sprites.movingObject = new Image();
+    sprites.movingObject.src = 'images/ship.png';
+
+    sprites.background = new Image();
+    sprites.background.src = 'images/space.png'
+
+    sprites.player = new Image();
+    sprites.player.src = 'images/hippy.png'
+
+    sprites.bullet = new Image();
+    sprites.bullet.src = 'images/mushroom.png'
+
+    sprites.gameOver = new Image();
+    sprites.gameOver.src = 'images/gameover-5x.png'
+
+    sprites.gameWinner = new Image();
+    sprites.gameWinner.src = 'images/gameWinner.png'
+
+    sprites.happyHippy = new Image();
+    sprites.happyHippy.src = 'images/lady.png'
+
+    sprites.gameOverShip = new Image();
+    sprites.gameOverShip.src = 'images/gameOverHippy.png'
+
+    sprites.testLaser = new Image();
+    sprites.testLaser.src = 'images/test-laser.png'
+
+    sprites.ratMan = new Image();
+    sprites.ratMan.src = 'images/ratMan.png'
+
+    sprites.rightBullet = new Image();
+    sprites.rightBullet.src = 'images/rightBullet.png'
+
+    sprites.leftBullet = new Image();
+    sprites.leftBullet.src = 'images/leftBullet.png'
+
+    sprites.groundShip = new Image();
+    sprites.groundShip.src = 'images/groundShip-e.png'
+
+  }
+
+
+
+  var canvas = document.getElementById("mycanvas");
+  var ctx = canvas.getContext("2d");
+
+  var draw = function() {
+
+    if (gameNotStarted) {
+      ctx.fillStyle = "#000";
+      ctx.drawImage(sprites.background, 0, 0);
+      ctx.fillRect(200,20,195,83);
+      ctx.fillRect(15,105,615,125);
+
+      ctx.font = "35px tahoma"
+      ctx.fillStyle = "#FFE700";
+      ctx.fillText("HIPPIE SPACE DRIFT", 150, 75);
+      ctx.font = "20px arial"
+      ctx.fillStyle = "#FFE700";
+      ctx.fillText("Use 'a' and 'd' or '<-' and '->' to move left and right", 15, 125);
+      ctx.fillText("Press 'z' to jump", 15, 150)
+      ctx.fillText("Press 'spacebar', 'control' and 'command' to shoot different directions", 15, 175)
+      ctx.fillText("Destroy all the ships to win!", 15, 200)
+      ctx.fillText("Press 'enter' to start. You may need to click in the window first!", 15, 225)
+
+    } else if (player.lives <= 0 || player.bulletsLeft <= 0 && player.hits < 9 ){
+      asteroidsArray = [] // prevent hits after gameover
+      ctx.drawImage(sprites.background, 0, 0);
+      ctx.drawImage(sprites.gameOver, 230, 0);
+      ctx.drawImage(sprites.gameOverShip, 260, 264)
+      ctx.font = "20px tahoma"
+      ctx.fillStyle = "#FFE700";
+      ctx.fillText("Refresh your browser to try again!", 160, 180);
+      gameMusic.stop();
+      gameOverMusic.play();
+
+    } else if (player.hits >= 10) {
+      ctx.drawImage(sprites.background, 0, 0);
+      ctx.drawImage(sprites.gameWinner, 230, 50)
+      ctx.fillStyle = "#FFE700";
+      var theNumber = Math.round(((player.hits / (100 - player.bulletsLeft)) * 100)).toString()
+      ctx.drawImage(sprites.happyHippy, 210, 200)
+      ctx.fillText("Nice shot! How about you show me your spaceship!", 120, 120);
+      ctx.fillText("To Be Continued...", 225, 180);
+      ctx.font = "16px tahoma";
+      ctx.fillText("Refresh your browser to play again!", 375, 300);
+    }else{
+      ctx.drawImage(sprites.background, 0, 0);
+      ctx.drawImage(sprites.player, player.pos[0], player.pos[1]);
+      ///add test ratMan
+
+      ctx.font = "20px Arial";
+      //ctx.drawImage(sprites.ratMan, testRatMan.pos[0], testRatMan.pos[1]);
+      ctx.fillStyle = "#FFE700";
+      ctx.fillText(("Health: " + (player.lives)), 25, 150)
+      ctx.fillText(("Hits: " + player.hits), 25, 180)
+      if (bulletsArray.length >= 4) {
+        ctx.fillText("GUN RECHARGING", 25, 210)
+      }
+
+
+      asteroidsArray.forEach(function(element, index){
+        if (element.notHit) {
+          var x = element.pos[0]
+          var y = element.pos[1]
+          ctx.drawImage(sprites.movingObject, x, y );
+        }
+      });
+
+      bulletsArray.forEach(function(element, index){
+            var x = element.pos[0]
+            var y = element.pos[1]
+          if (element.direction == "up") {
+            ctx.drawImage(sprites.bullet, x, y );
+          } else if (element.direction == "right") {
+            ctx.drawImage(sprites.rightBullet, element.pos[0], element.pos[1]);
+          } else if (element.direction == "left") {
+            ctx.drawImage(sprites.leftBullet, element.pos[0], element.pos[1]);
+          }
+      });
+
+      lasersArray.forEach(function(element, index) {
+            var x = element.pos[0];
+            var y = element.pos[1];
+          if (element.notHit) {
+            ctx.drawImage(sprites.testLaser, x, y);
+          }
+      });
+
+      ctx.drawImage(sprites.groundShip, testGroundShip.pos[0], testGroundShip.pos[1]);
+
+//       ctx.fillStyle = "#FF0000"; //these two test show over centered
+// ctx.fillRect(260,265,69,93);
+//
+// ctx.fillStyle = "#FF0000";
+// ctx.fillRect(200,4,22,46);
+    }
+  }
+
+
+
+
+//slope test
+  canvas.addEventListener("keydown", checkKeyPressed, false);
+  function checkKeyPressed(e) {
+    console.log(e.keyCode)
+
+
+    if (e.keyCode == "13") {
+       gameNotStarted = false;
+       gameMusic.play();
+
+    }
+
+    if (e.keyCode == "65" || e.keyCode == "37") {
+        player.pos[0] -= 30
+      //  if (player.slope[0] === 0) {
+      //    player.slope[0] = -1;
+      //  }
+    }
+    /*
+    if (e.keyCode == "83" || e.keyCode == "40") {
+        player.slope[1] += 1
+    }
+    */
+
+    if (e.keyCode == "68" || e.keyCode == "39") {
+        player.pos[0] += 38
+      //  if (player.slope[0] === 0) {
+      //    player.slope[0] = 1;
+      //  }
+    }
+    /*
+    if (e.keyCode == "87" || e.keyCode == "38") {
+        player.slope[1] -= 1
+    }
+    */
+    // this is for bullets that shoot straight up
+    if (e.keyCode == "32") {
+      // increase difficulty by only allowing 1 bullet on the screen at a time and also decrease bullet speed
+      if (bulletsArray.length < 4) {
+
+        player.bulletsLeft -= 1
+        bulletsArray.push(new Bullet([0,-11]))
+
+      }
+    }
+    /// this is for a horizontal bullet that shoots to the right
+    if (e.keyCode == "91"){
+
+        player.bulletsLeft -= 1
+        bulletsArray.push({pos: [player.pos[0] + 20, player.pos[1]  - 20], slope: [11,0], w:45, h:1, direction: "right"}) ;
+
+    }
+
+    if (e.keyCode == "17"){
+
+        player.bulletsLeft -= 1
+        bulletsArray.push({pos: [player.pos[0] - 38, player.pos[1]  - 20], slope: [-11,0], w:45, h:1, direction: "left"}) ;
+
+    }
+
+    if (e.keyCode == "16"){
+        player.slope[0] *= -1
+    }
+
+    if (e.keyCode == "90") {
+      player.pos = [player.pos[0], 125]
+    }
+
+
+
+  }
+
+
+
+  var update = function() {
+    // send ground ship if it has not been started and player hits if 9
+    if (player.hits == 9 && testGroundShip.notStarted) {
+      testGroundShip.slope = [-10, 0];
+      testGroundShip.notStarted = false;
+    }
+
+    // advance groundShip
+    if (testGroundShip.pos[0] < -100) {
+      testGroundShip.pos[0] = 700;
+    }
+    testGroundShip.pos[0] = testGroundShip.pos[0] + testGroundShip.slope[0];
+
+
+    testRatMan.move()
+    if (player.pos[1] < 265) {
+      player.pos[1] +=1
+    }
+    if (player.hits === 3) {
+      asteroidsArray = asteroidsArray2;
+    }
+
+    if (player.hits === 6) {
+      asteroidsArray = asteroidsArray3;
+    }
+    var newLeftCoords = [-50, -135, -233]
+    var newXCoords = [650, 790, 850];
+    ctx.clearRect(0,0,GAME_WIDTH,GAME_HEIGHT);
+    asteroidsArray.forEach(function(element, index){
+      var randomLaser = Math.random();
+      if (randomLaser >= 0.945 && gameNotStarted == false) {
+        var laserPos = [(element.pos[0] + 10), element.pos[1]]
+        laserSound.play();
+        lasersArray.push(new Laser(laserPos, [((Math.random() * 10))/2, (Math.random() * 30)/2])); /// test laser with each ship making one with set default slopes
+      }
+      var newX = (element.pos[0] + element.vel[0])
+      var newY = (element.pos[1] + element.vel[1])
+      element.pos = [newX,newY]
+        //wrap ships on screen
+        if (element.pos[0] < -100 && element.approachSide === "right") {
+            element.pos[0] = newXCoords.pop()
+        } else if (element.pos[0] > 790 && element.approachSide === "left") {
+            element.pos[0] = newLeftCoords.pop()
+        }
+
+    });
+
+    player.pos = [(player.pos[0] + player.slope[0]), (player.pos[1] + player.slope[1])]
+    /// checks for off screen and then wraps if off screen
+    if (player.pos[0] > GAME_WIDTH + 100){
+      player.pos[0] = 0
+    }
+
+    if (player.pos[0] < -100) {
+      player.pos[0] = GAME_WIDTH
+    }
+
+    if (player.pos[1] > GAME_HEIGHT + 100) {
+      player.pos[1] = 0
+    }
+
+    if (player.pos[1] < -100) {
+      player.pos[1] = GAME_HEIGHT
+    }
+    /// delete bullets if not on map else update bullet position
+    bulletsArray.forEach(function(element, index){
+      if (element.pos[0] > GAME_WIDTH + 100 || element.pos[0] < -100 || element.pos[1] > GAME_HEIGHT + 100 || element.pos[1] < -100) {
+        // debugger
+        bulletsArray.splice(index,1);
+      } else {
+        //element.slope = [(player.slope[0] * -1), (player.slope[1] * -1)]
+        element.pos = [element.pos[0] + element.slope[0] , element.pos[1] + element.slope[1]]
+      }
+      return bulletsArray
+    });
+    ////Introduce lasers new position each update *** make sure to all laser splice for out of range and colission detection
+    lasersArray.forEach(function(element, index) {
+      if (element.pos[0] > GAME_WIDTH || element.pos[0] < 0 || element.pos[1] > GAME_HEIGHT || element.pos[1] < 0) {
+        // debugger
+        lasersArray.splice(index,1);
+      }else{
+       element.pos = [(element.pos[0] +  element.slope[0]), (element.pos[1] + element.slope[1])]
+      }
+    });
+
+    ///////attempted collission detection in the update method//////
+    for (idx1 = 0; idx1 < asteroidsArray.length; idx1++) {
+      ///test collision
+      if (bulletsArray.length > 0){
+        for (idx2 = 0; idx2 < bulletsArray.length; idx2++) {
+          var deleteTarget = false; // remove target so dead targets so not give extra hits
+          if (checkCollision(bulletsArray[idx2], asteroidsArray[idx1])) {
+            deleteTarget = true;
+            if (asteroidsArray[idx1].notHit) {
+            player.hits += 1;
+            }
+            var indexForRemove = bulletsArray.indexOf(bulletsArray[idx2]);
+            bulletsArray.splice(indexForRemove,1);
+            asteroidsArray[idx1].notHit = false;
+          }
+
+
+
+        }
+         if (deleteTarget) {
+           asteroidsArray.splice(idx1,1); ///removes target once it has been hit
+         }
+      }
+
+    };
+
+    lasersArray.forEach(function(element, index) {
+      if (checkCollision(player, element)) {
+        playerHitSound.play();
+        lasersArray.splice(index,1)
+        player.lives -= 1
+      }
+    });
+
+    if (checkCollision(player, testGroundShip)) {
+
+        player.lives -= 1
+    }
+
+    bulletsArray.forEach(function(element, index) {
+      if (checkCollision(element, testGroundShip)) {
+        player.hits += 1;
+        //moves ship off course so it does not run player over after winner screen
+        testGroundShip.pos = [800, 800]
+      }
+    });
+  }
+
+  var step = function() {
+
+    update();
+    draw();
+
+    window.requestAnimationFrame(step);
+
+  };
+
+  load();
+  step();
+});
+</script>
+</body>
+</html>

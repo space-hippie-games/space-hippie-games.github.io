@@ -244,6 +244,7 @@ window.addEventListener("load",function() {
       gameOverMusic.play();
 
     } else if (player.hits >= 19) {
+      lasersArray = [];
       ctx.drawImage(sprites.background, 0, 0);
       ctx.drawImage(sprites.gameWinner, 230, 50)
       ctx.fillStyle = "#FFE700";

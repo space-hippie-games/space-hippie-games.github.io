@@ -63,7 +63,14 @@ window.addEventListener("load",function() {
     this.notStarted = true;
   }
 
-  var testGroundShip = new groundShip()
+  var groundShipNumber = 1 // variable starts at one and helps game determine the direction for movement of groundShip
+
+  var groundShip1 = new groundShip()
+  var groundShip2 = new groundShip()
+    groundShip2.pos = [-850, 210]
+  var groundShip3 = new groundShip()
+
+  var groundShipArray = [groundShip1, groundShip2, groundShip3];
 
   //var testRatMan =  new aRatMan()
   var testRatMan = new aRatMan()
@@ -230,7 +237,7 @@ window.addEventListener("load",function() {
       gameMusic.stop();
       gameOverMusic.play();
 
-    } else if (player.hits >= 10) {
+    } else if (player.hits >= 12) {
       ctx.drawImage(sprites.background, 0, 0);
       ctx.drawImage(sprites.gameWinner, 230, 50)
       ctx.fillStyle = "#FFE700";
@@ -283,7 +290,7 @@ window.addEventListener("load",function() {
           }
       });
 
-      ctx.drawImage(sprites.groundShip, testGroundShip.pos[0], testGroundShip.pos[1]);
+      ctx.drawImage(sprites.groundShip, groundShipArray[0].pos[0], groundShipArray[0].pos[1]);
 
 //       ctx.fillStyle = "#FF0000"; //these two test show over centered
 // ctx.fillRect(260,265,69,93);
@@ -372,17 +379,33 @@ window.addEventListener("load",function() {
 
   var update = function() {
     // send ground ship if it has not been started and player hits if 9
-    if (player.hits == 9 && testGroundShip.notStarted) {
-      testGroundShip.slope = [-10, 0];
-      testGroundShip.notStarted = false;
+    // these multi branches set slope based on ship number so game knows what direction the ship will move
+    if (player.hits >= 9 && groundShipArray.length > 0) {
+      if (groundShipArray[0].notStarted) {
+        if (groundShipNumber % 2 == 1) {
+          groundShipArray[0].slope = [-10, 0];
+          groundShipArray[0].notStarted = false;
+        }else{
+          groundShipArray[0].slope = [10, 0];
+          groundShipArray[0].notStarted = false;
+        }
+      }
     }
 
     // advance groundShip
-    if (testGroundShip.pos[0] < -100) {
-      testGroundShip.pos[0] = 700;
+    // orient ship wrap to direction that ship is moving
+    if (groundShipNumber % 2 == 1) {
+      if (groundShipArray[0].pos[0] < -100) {
+        groundShipArray[0].pos[0] = 700;
+      }
+    }else if (groundShipNumber % 2 == 0) {
+      if (groundShipArray[0].pos[0] > 700) {
+        groundShipArray[0].pos[0] = -100;
+      }
     }
-    testGroundShip.pos[0] = testGroundShip.pos[0] + testGroundShip.slope[0];
-
+    if (groundShipArray.length > 0) {
+      groundShipArray[0].pos[0] = groundShipArray[0].pos[0] + groundShipArray[0].slope[0];
+    }
 
     testRatMan.move()
     if (player.pos[1] < 265) {
@@ -489,16 +512,16 @@ window.addEventListener("load",function() {
       }
     });
 
-    if (checkCollision(player, testGroundShip)) {
+    if (checkCollision(player, groundShipArray[0])) {
 
         player.lives -= 1
     }
 
     bulletsArray.forEach(function(element, index) {
-      if (checkCollision(element, testGroundShip)) {
+      if (checkCollision(element, groundShipArray[0]) && groundShipArray[0].notStarted == false) {
         player.hits += 1;
-        //moves ship off course so it does not run player over after winner screen
-        testGroundShip.pos = [800, 800]
+        groundShipNumber += 1
+        groundShipArray.splice(0,1);
       }
     });
   }

@@ -227,8 +227,8 @@ window.addEventListener("load",function() {
       ctx.font = "20px arial"
       ctx.fillStyle = "#FFE700";
       ctx.fillText("Use 'a' and 'd' or '<-' and '->' to move left and right", 15, 125);
-      ctx.fillText("Press 'z' to jump", 15, 150)
-      ctx.fillText("Press 'spacebar', 'control' and 'command' to shoot different directions", 15, 175)
+      ctx.fillText("Press 'c' to jump", 15, 150)
+      ctx.fillText("Press 'spacebar', 'z' and 'c' to shoot different directions", 15, 175)
       ctx.fillText("Destroy all the ships to win!", 15, 200)
       ctx.fillText("Press 'enter' to start. You may need to click in the window first!", 15, 225)
 
@@ -355,26 +355,23 @@ window.addEventListener("load",function() {
 
       }
     }
-    /// this is for a horizontal bullet that shoots to the right
-    if (e.keyCode == "91"){
+    /// c shoot right
+    if (e.keyCode == "67"){
 
         player.bulletsLeft -= 1
         bulletsArray.push({pos: [player.pos[0] + 20, player.pos[1]  - 20], slope: [11,0], w:45, h:1, direction: "right"}) ;
 
     }
-
-    if (e.keyCode == "17"){
+    // z shoots left
+    if (e.keyCode == "90"){
 
         player.bulletsLeft -= 1
         bulletsArray.push({pos: [player.pos[0] - 38, player.pos[1]  - 20], slope: [-11,0], w:45, h:1, direction: "left"}) ;
 
     }
 
-    if (e.keyCode == "16"){
-        player.slope[0] *= -1
-    }
-
-    if (e.keyCode == "90") {
+    // x jump
+    if (e.keyCode == "88") {
       player.pos = [player.pos[0], 125]
     }
 
@@ -459,7 +456,7 @@ window.addEventListener("load",function() {
 
     });
 
-    player.pos = [(player.pos[0] + player.slope[0]), (player.pos[1] + player.slope[1])]
+    //player.pos = [(player.pos[0] + player.slope[0]), (player.pos[1] + player.slope[1])]
     /// checks for off screen and then wraps if off screen
     if (player.pos[0] > GAME_WIDTH + 100){
       player.pos[0] = 0

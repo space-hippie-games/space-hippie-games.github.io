@@ -107,8 +107,8 @@ window.addEventListener("load",function() {
      speed: 3,
      bulletsLeft: 10000,
      hits: 0,
-     w: 32,
-     h: 32
+     w: 65,
+     h: 93
   }
 
   var bulletsArray = [];
@@ -451,7 +451,9 @@ window.addEventListener("load",function() {
       var randomLaser = Math.random();
       if (randomLaser >= 0.945 && gameNotStarted == false) {
         var laserPos = [(element.pos[0] + 10), element.pos[1]]
-        laserSound.play();
+        if (player.lives > 0) {
+          laserSound.play();
+        }
         lasersArray.push(new Laser(laserPos, [((Math.random() * 10))/2, (Math.random() * 30)/2])); /// test laser with each ship making one with set default slopes
       }
       var newX = (element.pos[0] + element.vel[0])
@@ -532,7 +534,7 @@ window.addEventListener("load",function() {
     if (lasersArray.length > 0) {
       lasersArray.forEach(function(element, index) {
         if (checkCollision(player, element)) {
-          if (player.lives > 0) {
+          if (player.lives > 0 && player.hits < 19) {
             playerHitSound.play();
           }
           lasersArray.splice(index,1)

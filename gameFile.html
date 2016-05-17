@@ -87,7 +87,7 @@ window.addEventListener("load",function() {
   ///The groundshipArray has ships directed in the update method after a certain number of flying ships are destroyed***
   ///***the ships have been loaded in the array with alternating coordinates to move alt directions ***
   ///*** this should be refactored later to improve later changes in the code base
-  
+
   var groundShipArray = [groundShip1, groundShip2, groundShip3, groundShip4, groundShip5, groundShip6, groundShip7];
 
   //var testRatMan =  new aRatMan()
@@ -244,7 +244,7 @@ window.addEventListener("load",function() {
       ctx.fillText("Destroy all the ships to win!", 15, 200)
       ctx.fillText("Press 'enter' to start. You may need to click in the window first!", 15, 225)
 
-    } else if (player.lives <= 0 || player.bulletsLeft <= 0 && player.hits < 9 ){
+    } else if (player.lives <= 0 ){
       asteroidsArray = [] // prevent hits after gameover
       ctx.drawImage(sprites.background, 0, 0);
       ctx.drawImage(sprites.gameOver, 230, 0);
@@ -276,9 +276,7 @@ window.addEventListener("load",function() {
       ctx.fillStyle = "#FFE700";
       ctx.fillText(("Health: " + (player.lives)), 25, 150)
       ctx.fillText(("Hits: " + player.hits), 25, 180)
-      if (bulletsArray.length >= 4) {
-        ctx.fillText("GUN RECHARGING", 25, 210)
-      }
+
 
 
       asteroidsArray.forEach(function(element, index){
@@ -534,7 +532,9 @@ window.addEventListener("load",function() {
     if (lasersArray.length > 0) {
       lasersArray.forEach(function(element, index) {
         if (checkCollision(player, element)) {
-          playerHitSound.play();
+          if (player.lives > 0) {
+            playerHitSound.play();
+          }
           lasersArray.splice(index,1)
           player.lives -= 1
         }
@@ -544,6 +544,9 @@ window.addEventListener("load",function() {
     // check for ground ships hit
     if (groundShipArray.length > 0) {
       if (checkCollision(player, groundShipArray[0])) {
+        if (player.lives > 0) {
+          playerHitSound.play();
+        }
           player.lives -= 1
       }
       bulletsArray.forEach(function(element, index) {

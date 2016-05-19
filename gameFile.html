@@ -100,15 +100,15 @@ window.addEventListener("load",function() {
 
 
   var player = {
-     lives: 8,
-     pos: [260,265],
-     origin: [300, 400],
-     slope: [0,0],
-     speed: 3,
-     bulletsLeft: 10000,
-     hits: 0,
-     w: 65,
-     h: 93
+    lives: 1,
+    pos: [260,265],
+    origin: [300, 400],
+    slope: [0,0],
+    speed: 3,
+    bulletsLeft: 10000,
+    hits: 0,
+    w: 32,
+    h: 32
   }
 
   var bulletsArray = [];
@@ -425,9 +425,9 @@ window.addEventListener("load",function() {
     /// add in some extra ships after the ground ships have been destroyed
 
     testRatMan.move()
-    if (player.pos[1] < 265) {
-      player.pos[1] +=1
-    }
+    // if (player.pos[1] < 265) {
+    //   player.pos[1] +=2
+    // }
     if (player.hits === 3) {
       asteroidsArray = asteroidsArray2;
     }
